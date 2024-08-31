@@ -1,2 +1,2 @@
-*/5 * * * * /app/harvest_and_push.sh
+*/10 * * * * /app/harvest_and_push.sh
 

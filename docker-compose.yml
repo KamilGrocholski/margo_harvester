@@ -1,8 +1,0 @@
-services:
-  harvester:
-    build: .
-    volumes:
-      - .:/app
-    env_file:
-      - .env
-    # entrypoint: ["crond", "-l", "2", "-f"] // run it from Dockerfile

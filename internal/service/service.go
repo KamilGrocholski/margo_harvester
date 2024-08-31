@@ -11,13 +11,18 @@ import (
 // WorldType -> WorldName -> PlayersOnline
 type CreateHarvesterSessionInputData = map[string]map[string]uint
 
-type WorldStatsTimelineTimestamp struct {
-	Timestamp     time.Time `json:"timestamp"`
-	PlayersOnline uint      `json:"playersOnline"`
+type HarvesterSession struct {
+	ID        uint      `json:"id"`
+	StartedAt time.Time `json:"startedAt"`
+	EndedAt   time.Time `json:"endedAt"`
+}
+
+type HarvesterSessionsList struct {
+	HarvesterSessions []HarvesterSession `json:"harvesterSessions"`
 }
 
 type WorldStatsTimeline struct {
-	Timeline []WorldStatsTimelineTimestamp `json:"timeline"`
+	Timeline [][2]int64 `json:"l"` // to minify json
 }
 
 type World struct {
@@ -47,6 +52,10 @@ type Service interface {
 	GetAllWorlds(
 		ctx context.Context,
 	) (*WorldsList, error)
+
+	GetAllHarvesterSessions(
+		ctx context.Context,
+	) (*HarvesterSessionsList, error)
 }
 
 type service struct {
@@ -81,32 +90,36 @@ func (s *service) CreateHarvesterSession(
 
 	for worldType, stats := range data {
 		var worldTypeModel model.WorldType
-		if err := tx.
+		err := tx.
 			Where("name = ?", worldType).
-			FirstOrCreate(&worldTypeModel, model.WorldType{Name: worldType}).Error; err != nil {
+			FirstOrCreate(&worldTypeModel, model.WorldType{Name: worldType}).Error
+		if err != nil {
 			tx.Rollback()
 			return err
 		}
 
 		for worldName, playersOnline := range stats {
 			var worldModel model.World
-			if err := tx.
+			err := tx.
 				Where("name = ? AND world_type_id = ?", worldName, worldTypeModel.ID).
 				FirstOrCreate(&worldModel, model.World{
 					Name:        worldName,
 					WorldTypeID: worldTypeModel.ID,
-				}).Error; err != nil {
+				}).Error
+			if err != nil {
 				tx.Rollback()
 				return err
 			}
 
 			worldStats := model.WorldStats{
 				PlayersOnline:      playersOnline,
+				Timestamp:          startedAt,
 				WorldID:            worldModel.ID,
 				HarvesterSessionID: harvesterSession.ID,
 			}
 
-			if err := tx.Create(&worldStats).Error; err != nil {
+			err = tx.Create(&worldStats).Error
+			if err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -125,21 +138,21 @@ func (s *service) GetWorldStatsTimeline(
 	var worldStats []model.WorldStats
 
 	err := s.db.WithContext(ctx).
-		Joins("JOIN worlds ON world_stats.world_id = worlds.id").
-		Joins("JOIN world_types ON worlds.world_type_id = world_types.id").
+		Joins("JOIN worlds ON worlds.id = world_stats.world_id").
+		Joins("JOIN world_types ON world_types.id = worlds.world_type_id").
 		Where("worlds.name = ? AND world_types.name = ?", worldName, worldType).
-		Preload("HarvesterSession").
 		Limit(limit).
-		Find(&worldStats).Error
+		Find(&worldStats).
+		Error
 	if err != nil {
 		return nil, err
 	}
 
-	timeline := make([]WorldStatsTimelineTimestamp, len(worldStats))
+	timeline := make([][2]int64, len(worldStats))
 	for i, s := range worldStats {
-		timeline[i] = WorldStatsTimelineTimestamp{
-			Timestamp:     s.HarvesterSession.StartedAt,
-			PlayersOnline: s.PlayersOnline,
+		timeline[i] = [2]int64{
+			s.Timestamp.Unix(),
+			int64(s.PlayersOnline),
 		}
 	}
 
@@ -170,5 +183,31 @@ func (s *service) GetAllWorlds(
 
 	return &WorldsList{
 		Worlds: out,
+	}, nil
+}
+
+func (s *service) GetAllHarvesterSessions(
+	ctx context.Context,
+) (*HarvesterSessionsList, error) {
+	var harvesterSessions []model.HarvesterSession
+
+	err := s.db.WithContext(ctx).
+		Find(&harvesterSessions).
+		Error
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]HarvesterSession, len(harvesterSessions))
+	for i, s := range harvesterSessions {
+		out[i] = HarvesterSession{
+			ID:        s.ID,
+			StartedAt: s.StartedAt,
+			EndedAt:   s.EndedAt,
+		}
+	}
+
+	return &HarvesterSessionsList{
+		HarvesterSessions: out,
 	}, nil
 }

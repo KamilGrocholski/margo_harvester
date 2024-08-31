@@ -23,6 +23,10 @@ type MockService struct {
 	GetAllWorldsFunc func(
 		ctx context.Context,
 	) (*WorldsList, error)
+
+	GetAllHarvesterSessionsFunc func(
+		ctx context.Context,
+	) (*HarvesterSessionsList, error)
 }
 
 func (m MockService) CreateHarvesterSession(
@@ -45,4 +49,8 @@ func (m MockService) GetWorldStatsTimeline(
 
 func (m MockService) GetAllWorlds(ctx context.Context) (*WorldsList, error) {
 	return m.GetAllWorldsFunc(ctx)
+}
+
+func (m MockService) GetAllHarvesterSessions(ctx context.Context) (*HarvesterSessionsList, error) {
+	return m.GetAllHarvesterSessionsFunc(ctx)
 }

@@ -47,4 +47,6 @@ vendor/
 .go-version
 
 _curl_testing.*
-public
+public/*
+!public/script.js
+!public/index.html

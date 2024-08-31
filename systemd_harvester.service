@@ -1,0 +1,14 @@
+[Unit]
+Description=Harvester Container
+After=network.target
+
+[Service]
+Restart=unless-stopped
+ExecStart=/usr/bin/docker run --rm --name harvester \
+  --restart unless-stopped \
+  --env-file /path/to/.env \
+  harvester_image:latest
+ExecStop=/usr/bin/docker stop harvester
+
+[Install]
+WantedBy=multi-user.target

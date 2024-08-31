@@ -65,15 +65,15 @@ func (h *harvester) Harvest(ctx context.Context) (*HarvestResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	privateWorlds, err := thrashWorldsByWorldType(ctx, doc, selectorPrivateWorldsList)
-	if err != nil {
-		return nil, err
-	}
+	// privateWorlds, err := thrashWorldsByWorldType(ctx, doc, selectorPrivateWorldsList)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return &HarvestResult{
 		Data: service.CreateHarvesterSessionInputData{
-			"public":  publicWorlds,
-			"private": privateWorlds,
+			"public": publicWorlds,
+			// "private": privateWorlds,
 		},
 		StartedAt: state.startedAt,
 		EndedAt:   time.Now(),
