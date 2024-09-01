@@ -1,4 +1,5 @@
 # TODO
+
 Create an image, so that I do not have to build it all the time on the pi
 
 # How to run on raspberrypi linux/arm64
@@ -18,14 +19,14 @@ docker buildx build --platform linux/arm64 \
 4. Setup systemd service
 
 ```bash
-sudo cp systemd_harvest.service /etc/systemd/system
+sudo cp harvest.service /etc/systemd/system
 ```
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl restart systemd_harvest.service
+sudo systemctl restart harvest.service
 ```
 
 ```bash
-sudo systemctl status systemd_harvest.service
+sudo systemctl status harvest.service
 ```
