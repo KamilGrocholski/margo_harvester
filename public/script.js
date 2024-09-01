@@ -86,6 +86,13 @@ class App {
   async #fetchWorldStatsTimeline(link) {
     const res = await fetch(link);
     const data = await res.json();
+    // TODO: Remove when the be is fixed
+    // fix timezone
+    const timeZoneOffset = 2 * 60 * 60 * 1000;
+    // unix
+    for (let i = 0; i < data.l.length; i++) {
+      data.l[i][0] = data.l[i][0] * 1000 + timeZoneOffset;
+    }
     return data;
   }
 
@@ -102,8 +109,6 @@ class App {
   #renderChart(worldStatsTimeline) {
     this.#worldStatsContainer.innerHTML = "";
 
-    const data = worldStatsTimeline.l.map((stat) => stat[1]);
-
     Highcharts.stockChart(this.#worldStatsContainer, {
       rangeSelector: {
         selected: 1,
@@ -116,7 +121,7 @@ class App {
       series: [
         {
           name: "Postacie online",
-          data: data,
+          data: worldStatsTimeline.l,
         },
       ],
     });

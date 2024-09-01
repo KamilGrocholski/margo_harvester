@@ -1,2 +1,2 @@
-*/10 * * * * /app/harvest_and_push.sh
-
+*/1 * * * * /app/run.sh
+# keep this line
