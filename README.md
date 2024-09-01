@@ -5,7 +5,7 @@ Create an image, so that I do not have to build it all the time on the pi
 
 1. Clone repo
 
-2. Create and setup .env file based on .env.example
+2. Create and setup .env file based on .env.example, and setup crontab
 
 3. Build and load docker
 

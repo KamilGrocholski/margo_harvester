@@ -1,2 +1,2 @@
-*/1 * * * * /app/run.sh
+*/10 * * * * /app/run.sh
 # keep this line
