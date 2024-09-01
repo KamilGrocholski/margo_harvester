@@ -50,3 +50,4 @@ _curl_testing.*
 public/*
 !public/script.js
 !public/index.html
+!harvest_and_push.sh
